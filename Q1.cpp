@@ -34,6 +34,9 @@ struct Y {
         return i;
     }
 
+    // Conversion constructor to convert X to Y
+    Y(const X& x) : i(x.i) {}
+
     // Overload + operator to add X to Y
     Y operator+(const X& x) const {
         return Y(i + x.i);
@@ -62,13 +65,13 @@ int f(X x) {
 
 int main() {
     X x = 1;   // Calls X(int)
-    Y y = 2;   // Calls Y(int)
+    Y y = x;   // Calls Y(X) conversion constructor
 
     int i = 2;
 
     // Printing results of each expression
     cout << "i + 10 = " << (i + 10) << endl;             // int + int
-    cout << "y + 10 = " << (static_cast<int>(y) + 10) << endl;
+    cout << "y + 10 = " << (static_cast<int>(y) + 10) << endl; // Y + int
     cout << "y + 10 * y = " << (y + 10 * y).i << endl;
 
     cout << "x + y + i = " << (x + y + i).i << endl;     // X + Y + int
@@ -77,7 +80,7 @@ int main() {
 
     cout << "f(y) = " << f(X(y)) << endl;                // f(X(Y -> int))
     cout << "y + y = " << (y + y).i << endl;             // Y + Y
-    cout << "106 + y = " << (106 + static_cast<int>(y)) << endl;
+    cout << "106 + y = " << (106 + static_cast<int>(y)) << endl; // int + Y
 
     return 0;
 }
@@ -86,29 +89,40 @@ int main() {
 1. i + 10
 Conversion: None (both are int).
 Result Type: int
+
 2. y + 10
 Conversion: Y → int (via operator int()).
 Result Type: int
+
 3. y + 10 * y
 Conversion:
 int * Y (via operator*(int, Y)).
 Y + Y (via operator+(Y, Y)).
 Result Type: Y
+
 4. x + y + i
-Conversion: Y → int (via operator int()).
-Result Type: X
+Conversion:
+Y → int (via operator int()) for the addition with i.
+Result Type: X (because X + Y results in an X, which then adds to an int).
+
 5. x * x + i
-Conversion: None (assuming x * x is valid).
+Conversion: None (assuming x * x is valid and both are X).
 Result Type: X
+
 6. f(7)
 Conversion: int → X (via constructor X(int)).
-Result Type: int
+Result Type: int (the return type of f).
+
 7. f(y)
-Conversion: Y → X (via X(Y → int)).
-Result Type: int
+Conversion:
+Y → int (via operator int(), when passed to f).
+int → X (via constructor X(int)).
+Result Type: int (the return type of f).
+
 8. y + y
 Conversion: None (both are Y).
 Result Type: Y
+
 9. 106 + y
 Conversion: Y → int (via operator int()).
 Result Type: int
